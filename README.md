@@ -78,3 +78,7 @@ $speech = (Get-ChildItem 'C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Spee
 - It uses the Windows default microphone. If you change the default, restart the program.
 - It can't type into programs running as administrator, unless you run Voice Typer as administrator too. Some games and password fields also block typed input.
 - Windows 10 and 11, 64-bit.
+
+## License
+
+GNU General Public License v3.0. See [LICENSE](LICENSE). You can use, share and change it, but if you share a changed version it has to stay open source under the same license.
