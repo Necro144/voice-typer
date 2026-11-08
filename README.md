@@ -1,79 +1,80 @@
 # Voice Typer
 
-**Talk instead of type, in any Windows app.** Voice Typer is a tiny tray program (about 10 KB) that turns your voice into typed text wherever your cursor is: browsers, Discord, Notepad, Word, search boxes, chat apps and more.
+A small Windows program that types what you say, into whatever you're using: a browser, Discord, Word, Notepad.
 
-- **Works offline.** It uses the speech recognizer built into Windows. Nothing is sent to the internet, no account is needed, and nothing is saved or logged.
-- **Works everywhere.** It types like a keyboard, so any app that accepts typing accepts your voice.
-- **One key to start and stop.** Press `Ctrl+Alt+D` or click the tray icon.
-- **You always know if it's on.** A rising two-note tone means on, a falling tone means off, and the tray dot turns red while listening.
+I wrote it because Windows' own voice typing (Win+H) wouldn't work for me with my phone as the microphone. Voice Typer uses the speech recognizer that is already built into Windows, so it works offline and nothing leaves your PC.
 
-## Download and use
+![icon](icons/preview.png)
 
-1. Download `VoiceTyper.exe` from the [latest release](../../releases/latest).
-2. Double-click it. A grey dot appears in the system tray (near the clock). If you don't see it, click the small `^` arrow.
-3. Click inside any text box.
-4. Press **Ctrl+Alt+D**. You hear a rising tone and the dot turns red.
-5. Speak. Your words are typed where the cursor is.
-6. Press **Ctrl+Alt+D** again to stop (falling tone).
+## Download
 
-To quit, right-click the tray icon and choose **Exit**.
+Get `VoiceTyper.exe` from the [latest release](../../releases/latest). It's a single file with no installer. To remove it, delete the file (and `%APPDATA%\VoiceTyper` if you want the settings gone too).
 
-## Spoken punctuation
+Edge and Windows SmartScreen will probably warn that the file "isn't commonly downloaded", and a few antivirus engines may flag it. Read the section on that below before you decide.
 
-| Say | You get |
-|---|---|
-| "comma" | , |
-| "period" or "full stop" | . |
-| "question mark" | ? |
-| "exclamation mark" or "exclamation point" | ! |
-| "colon" | : |
+## Using it
 
-The first letter of each sentence is capitalised, and a lone "i" becomes "I". There is deliberately no "new line" command, so it can never press Enter and send a chat message by accident.
+1. Open `VoiceTyper.exe`.
+2. Click into a text box in another program.
+3. Press **Ctrl+Alt+D**, or click the tray icon, or press Start in the window. You hear a rising tone and the icon turns red.
+4. Talk. The words are typed where your cursor is.
+5. Press Ctrl+Alt+D again to stop (falling tone).
 
-## Requirements
+Closing the window leaves it running in the tray. Use the tray menu to exit.
 
-- Windows 10 or 11 (64-bit), with the .NET Framework 4.x that ships with Windows.
-- A working microphone set as the **default recording device** (Settings > System > Sound > Input). If you change the default device, restart Voice Typer.
-- The **English (United States)** speech recognizer, which Windows installs with English (US).
+Say "scratch that" or "delete that" to remove the last phrase (English only). With spoken punctuation on, "comma", "period", "full stop", "question mark", "exclamation mark" and "colon" turn into the symbols. There's no "new line" command on purpose, since Enter would send your chat message.
 
-## Privacy and safety
+The window also has a level meter, a language list, a strictness slider (higher means it ignores phrases Windows isn't sure about) and a few switches.
 
-- No network access. The program contains no networking code, no telemetry and no logging.
-- It listens only while the tray dot is red, and it only types text. It never reads what is on your screen.
-- It is a keyboard-style tool, so some antivirus programs may warn about unsigned programs that send keystrokes. That is expected. You can read the full source in `VoiceTyper.cs` (about 200 lines) and build it yourself.
-- Check your download against the SHA-256 shown in the release notes.
+## Languages
 
-## Limits and troubleshooting
+Voice Typer lists whatever speech languages Windows has installed. On most PCs that's just English (United States). To add more, such as English (United Kingdom), French, German, Spanish, Italian, Japanese or Chinese, go to Settings > Time & language > Language, add the language and tick its speech recognition feature. Which languages have an offline speech pack depends on your version of Windows, and I haven't found one for Arabic.
 
-| Problem | Fix |
-|---|---|
-| Nothing is typed | Check that the Windows **Test your microphone** bar moves when you speak, and that the right device is the default input. Restart Voice Typer after changing it. |
-| It can't type into one app | Apps running as administrator ignore normal programs. Run Voice Typer as administrator too. Some games and secure fields block simulated typing. |
-| `Ctrl+Alt+D` doesn't work | Another program owns that shortcut. Click the tray icon instead. |
-| Mistakes in the text | The built-in recognizer is less accurate than online services. Speak in full sentences at a steady pace and keep the microphone close. |
-| Another language | Only English (US) is supported right now. |
+I've only tried English (United States), because it's the only one installed on my PC. The other languages should work but I can't promise it.
+
+## Antivirus warnings and VirusTotal
+
+Some versions of this program get flagged on VirusTotal. It's a false positive, but you shouldn't just take my word for it, so here is exactly what VirusTotal shows.
+
+| Version | SHA-256 | Result | Engines that flagged it |
+|---|---|---|---|
+| 1.0.0 | `543e67de3c8b90a15ae0a46931dab63b6f8b590614bc871e54987d46becce28e` | **5 of 68** | MaxSecure: `Trojan.Malware.300983.susgen`. McAfee Scanner: `Ti!543E67DE3C8B`. SecureAge: `Malicious`. SentinelOne (Static ML): `Static AI - Suspicious PE`. Trapmine: `Malicious.moderate.ml.score` |
+| 1.0.1 | `2ff76084712a0ce2579e0ef8920684281400c428620d7db26d227c60370c9321` | **1 of 66** | SecureAge: `Malicious` |
+| 1.0.2 and 2.0.0 | see the release notes | not scanned when this was written | |
+
+The other 63 to 65 engines said "Undetected", including Acronis, AhnLab, Alibaba, Avira and Arcabit. VirusTotal's popular threat label for 1.0.0 was just "trojan". Windows Defender scanned every build on my PC and found nothing.
+
+**Why it gets flagged.** Look at the names: "Static AI", "Suspicious PE", "ml.score", "susgen". Those are machine-learning or generic guesses, not the name of a known virus. The program does three things that malware also does:
+
+- It registers a global hotkey.
+- It listens to the microphone.
+- It types keystrokes into other programs, using the Windows `SendInput` call. Keyloggers, macro tools and remote-control software use the same call.
+
+On top of that it's a small .NET program that nobody has downloaded before and it isn't code-signed. A code-signing certificate costs money every year, so I haven't bought one. That combination is what these detectors dislike.
+
+**What I did about it.** Version 1.0.1 added a proper name, version and Windows manifest, which took it from 5 detections to 1. I sent SecureAge a false-positive report for 1.0.1 on 8 November 2026 and haven't heard back yet. I'll update this table when I do.
+
+**How to check it yourself.**
+
+- The whole program is in `src/`, about 600 lines. It has no network code at all.
+- Build it yourself (below) and you never have to trust my download.
+- Compare your download with the hash in the release notes: `Get-FileHash .\VoiceTyper.exe -Algorithm SHA256`
+- Upload it to [virustotal.com](https://www.virustotal.com) and look at the engines that flag it.
 
 ## Build from source
 
-You only need the C# compiler that comes with Windows. In PowerShell, from this folder:
+You only need the C# compiler that comes with Windows. Run `build.bat`, or in PowerShell:
 
 ```powershell
 $speech = (Get-ChildItem 'C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Speech' -Recurse -Filter System.Speech.dll | Select-Object -First 1).FullName
-& 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe' /nologo /target:winexe /optimize+ /out:VoiceTyper.exe /win32manifest:app.manifest "/r:$speech" /r:System.Windows.Forms.dll /r:System.Drawing.dll VoiceTyper.cs
+& 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe' /nologo /target:winexe /optimize+ /out:VoiceTyper.exe /win32icon:icons\app.ico /win32manifest:app.manifest /resource:icons\tray-off.ico,VoiceTyper.tray-off.ico /resource:icons\tray-on.ico,VoiceTyper.tray-on.ico "/r:$speech" /r:System.Windows.Forms.dll /r:System.Drawing.dll src\*.cs
 ```
 
-(`build.ps1` contains the same commands.)
+`tools/make_icons.py` redraws the icons. `VoiceTyper.exe --selftest` checks the speech setup without opening a window or touching the microphone, and writes the result to `%TEMP%\voicetyper-selftest.txt`.
 
-## How it works
+## Limits
 
-A hidden window registers the global hotkey. When dictation is on, `System.Speech`'s dictation grammar recognizes your speech from the default microphone. Each recognized phrase gets punctuation and capitalisation applied, then is typed into the focused window with the Windows `SendInput` API using Unicode key events.
-
-## Roadmap
-
-- Settings for the hotkey and the sounds
-- Option to start with Windows
-- More languages, where Windows has a recognizer for them
-
-## License
-
-Not chosen yet.
+- Windows' offline recognizer is less accurate than cloud services. Speak in full sentences, at a steady pace, close to the microphone.
+- It uses the Windows default microphone. If you change the default, restart the program.
+- It can't type into programs running as administrator, unless you run Voice Typer as administrator too. Some games and password fields also block typed input.
+- Windows 10 and 11, 64-bit.
