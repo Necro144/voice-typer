@@ -8,6 +8,15 @@ using System.Speech.Recognition;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using System.Reflection;
+
+[assembly: AssemblyTitle("Voice Typer")]
+[assembly: AssemblyDescription("Offline voice dictation tray app. Types what you say into the focused window.")]
+[assembly: AssemblyCompany("Necro144")]
+[assembly: AssemblyProduct("Voice Typer")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 Necro144")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 
 class VoiceTyper : Form
 {
