@@ -40,9 +40,10 @@ Some versions of this program get flagged on VirusTotal. It's a false positive, 
 |---|---|---|---|
 | 1.0.0 | `543e67de3c8b90a15ae0a46931dab63b6f8b590614bc871e54987d46becce28e` | **5 of 68** | MaxSecure: `Trojan.Malware.300983.susgen`. McAfee Scanner: `Ti!543E67DE3C8B`. SecureAge: `Malicious`. SentinelOne (Static ML): `Static AI - Suspicious PE`. Trapmine: `Malicious.moderate.ml.score` |
 | 1.0.1 | `2ff76084712a0ce2579e0ef8920684281400c428620d7db26d227c60370c9321` | **1 of 66** | SecureAge: `Malicious` |
-| 1.0.2 and 2.0.0 | see the release notes | not scanned when this was written | |
+| 1.0.2 | `13d278b86c2a8d6af40becac12e3f6e7b2268c37534dea90ea29f869cddb4a41` | not scanned | |
+| 2.0.0 | `3641b1fe17273fca3d2364930aa9a0a94f41c2c08887c887f95aa1329e081678` | **2 of 70** | SecureAge: `Malicious`. Trapmine: `Suspicious.low.ml.score` |
 
-The other 63 to 65 engines said "Undetected", including Acronis, AhnLab, Alibaba, Avira and Arcabit. VirusTotal's popular threat label for 1.0.0 was just "trojan". Windows Defender scanned every build on my PC and found nothing.
+Every other engine, 63 to 68 depending on the version, said "Undetected", including Acronis, AhnLab, Alibaba, ALYac, Arcabit, Avast, AVG, Avira and BitDefender. VirusTotal's popular threat label for 1.0.0 was just "trojan". Windows Defender scanned every build on my PC and found nothing.
 
 **Why it gets flagged.** Look at the names: "Static AI", "Suspicious PE", "ml.score", "susgen". Those are machine-learning or generic guesses, not the name of a known virus. The program does three things that malware also does:
 
@@ -52,7 +53,7 @@ The other 63 to 65 engines said "Undetected", including Acronis, AhnLab, Alibaba
 
 On top of that it's a small .NET program that nobody has downloaded before and it isn't code-signed. A code-signing certificate costs money every year, so I haven't bought one. That combination is what these detectors dislike.
 
-**What I did about it.** Version 1.0.1 added a proper name, version and Windows manifest, which took it from 5 detections to 1. I sent SecureAge a false-positive report for 1.0.1 on 8 November 2026 and haven't heard back yet. I'll update this table when I do.
+**What I did about it.** Version 1.0.1 added a proper name, version and Windows manifest, which took it from 5 detections to 1. SecureAge has flagged every version, so I sent them a false-positive report for 1.0.1 on 8 November 2026 and haven't heard back yet. Version 2.0.0 is a different file with a new hash, so it was scanned again from scratch: SecureAge still says "Malicious", and Trapmine added a low-confidence "Suspicious" label, which is the kind of ML score that changes from build to build. I'll update this table when SecureAge answers.
 
 **How to check it yourself.**
 
