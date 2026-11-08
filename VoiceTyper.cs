@@ -15,8 +15,8 @@ using System.Reflection;
 [assembly: AssemblyCompany("Necro144")]
 [assembly: AssemblyProduct("Voice Typer")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Necro144")]
-[assembly: AssemblyVersion("1.0.1.0")]
-[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
 
 class VoiceTyper : Form
 {
@@ -28,6 +28,40 @@ class VoiceTyper : Form
     [DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr h, int id);
     [DllImport("user32.dll", SetLastError = true)] static extern uint SendInput(uint n, INPUT[] inputs, int size);
     [DllImport("kernel32.dll")] static extern bool Beep(uint freq, uint ms);
+    [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr h);
+    [DllImport("user32.dll")] static extern bool IsWindow(IntPtr h);
+    [DllImport("user32.dll", CharSet = CharSet.Auto)] static extern int GetClassName(IntPtr h, System.Text.StringBuilder sb, int max);
+
+    // Windows that steal focus when you click the tray (the taskbar, tray overflow, menus). Typing must not go there.
+    static readonly string[] ShellClasses = { "Shell_TrayWnd", "Shell_SecondaryTrayWnd", "NotifyIconOverflowWindow",
+        "TopLevelWindowForOverflowXamlIsland", "XamlExplorerHostIslandWindow", "Windows.UI.Core.CoreWindow", "#32768" };
+    IntPtr lastWindow = IntPtr.Zero;
+    System.Windows.Forms.Timer focusTimer;
+
+    bool IsShell(IntPtr h)
+    {
+        var sb = new System.Text.StringBuilder(128);
+        GetClassName(h, sb, 128);
+        return Array.IndexOf(ShellClasses, sb.ToString()) >= 0;
+    }
+
+    void RememberWindow()
+    {
+        IntPtr h = GetForegroundWindow();
+        if (h != IntPtr.Zero && h != Handle && !IsShell(h)) lastWindow = h;
+    }
+
+    // If focus is on the taskbar (after a tray click), give it back to the window you were typing in.
+    void RestoreWindow()
+    {
+        IntPtr h = GetForegroundWindow();
+        if ((h == IntPtr.Zero || h == Handle || IsShell(h)) && lastWindow != IntPtr.Zero && IsWindow(lastWindow))
+        {
+            SetForegroundWindow(lastWindow);
+            Thread.Sleep(80);
+        }
+    }
 
     [StructLayout(LayoutKind.Sequential)] struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public IntPtr dwExtraInfo; }
     [StructLayout(LayoutKind.Sequential)] struct KEYBDINPUT { public ushort wVk, wScan; public uint dwFlags, time; public IntPtr dwExtraInfo; }
@@ -71,7 +105,12 @@ class VoiceTyper : Form
         tray.Text = "Voice Typer (off)";
         tray.ContextMenuStrip = menu;
         tray.Visible = true;
-        tray.MouseClick += delegate (object s, MouseEventArgs e) { if (e.Button == MouseButtons.Left) Toggle(); };
+        tray.MouseClick += delegate (object s, MouseEventArgs e) { if (e.Button == MouseButtons.Left) { Toggle(); RestoreWindow(); } };
+        toggleItem.Click += delegate { RestoreWindow(); };
+        focusTimer = new System.Windows.Forms.Timer();
+        focusTimer.Interval = 200;
+        focusTimer.Tick += delegate { RememberWindow(); };
+        focusTimer.Start();
     }
 
     protected override void SetVisibleCore(bool value) { base.SetVisibleCore(false); }
@@ -174,6 +213,7 @@ class VoiceTyper : Form
         if (sentenceStart && t.Length > 0) t = char.ToUpper(t[0]) + t.Substring(1);
         char last = t[t.Length - 1];
         sentenceStart = (last == '.' || last == '?' || last == '!');
+        RestoreWindow();
         SendText(t + " ");
     }
 
